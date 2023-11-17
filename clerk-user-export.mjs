@@ -19,13 +19,13 @@ if (!clerkSecretKey || clerkSecretKey.length < 1) {
     { id: "email", title: "Email", path: "emailAddresses[0].emailAddress" },
     {
       id: "createdAtUtc",
-      title: "Email",
+      title: "CreatedAtUtc",
       path: "createdAt",
       convertDateToUtc: true,
     },
     {
       id: "lastSignInAtUtc",
-      title: "Email",
+      title: "LastSignInUtc",
       path: "lastSignInAt",
       convertDateToUtc: true,
     },
