@@ -16,7 +16,7 @@ if (!clerkSecretKey || clerkSecretKey.length < 1) {
 
   const schema = [
     { id: "id", title: "ClerkUserId" },
-    { id: "email", title: "Email", path: "emailAddresses[0].emailAddress" },
+    { id: "email", title: "To", path: "emailAddresses[0].emailAddress" },
     {
       id: "createdAtUtc",
       title: "CreatedAtUtc",
@@ -40,13 +40,23 @@ if (!clerkSecretKey || clerkSecretKey.length < 1) {
     header: schema,
   });
 
-  const userList = clerkClient.users
-    .getUserList()
-    .then(function (users) {
-      console.log(`Found ${users.length} users.`);
+  try {
+    const MAX = 10;
+    let users = [];
+
+    while (true) {
+      const newUsers = await clerkClient.users.getUserList({
+        limit: MAX,
+        offset: users.length,
+        orderBy: "-created_at",
+      });
+
+      if (newUsers.length == 0) break;
+
+      console.log(`Fetched ${newUsers.length} users.`);
 
       // Convert the users to the schema format
-      users = users.map((user) => {
+      const convertedUsers = newUsers.map((user) => {
         return schema.reduce((rec, field) => {
           rec[field.id] = (field.path || field.id)
             .replace(/\[([^\[\]]*)\]/g, ".$1.")
@@ -60,14 +70,14 @@ if (!clerkSecretKey || clerkSecretKey.length < 1) {
         }, {});
       });
 
-      // Then write to CSV
-      csvWriter
-        .writeRecords(users)
-        .then(() =>
-          console.log(`The CSV file ${path} was written successfully`)
-        );
-    })
-    .catch(function (err) {
-      console.log(err);
-    });
+      users = [...users, ...convertedUsers];
+    }
+
+    // Then write to CSV
+    csvWriter
+      .writeRecords(users)
+      .then(() => console.log(`The CSV file ${path} was written successfully`));
+  } catch (err) {
+    console.log(err);
+  }
 }
