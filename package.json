@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@clerk/clerk-sdk-node": "^4.12.21",
+    "csv-writer": "^1.6.0"
+  }
+}
